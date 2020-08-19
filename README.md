@@ -1,3 +1,4 @@
 # MacOS-7
 
-![RGB](sound.png??raw=true "MacOS 7.1.2")
+![RGB](OS71-Events.png??raw=true "System7 events")
+
