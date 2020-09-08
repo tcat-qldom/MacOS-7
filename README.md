@@ -42,7 +42,8 @@ To view source files in MyApps folder on ux* systems,
 
 replacing CR line ending with LF, a suitable text editor will convert with whatever needed for your OS.
 
-**Venn Diagrammer**
+
+# Venn Diagrammer
 
 Have you ever fancied clasic Mac programming? Here is how - this is a functional application documented in `Inside Macintosh - Overview' book. While its main focus is on user interface coding, some parts are left, and not defined in the book. 
 
