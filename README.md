@@ -41,3 +41,16 @@ To view source files in MyApps folder on ux* systems,
 	$ sed s/\\r/\\n/g [file] | less
 
 replacing CR line ending with LF, a suitable text editor will convert with whatever needed for your OS.
+
+**Venn Diagrammer**
+
+Have you ever fancied clasic Mac programming? Here is how - this is a functional application documented in `Inside Macintosh - Overview' book. While its main focus is on user interface coding, some parts are left, and not defined in the book. 
+
+Currently unsupported are - automatic diagramme updates, and existential import to subject. Topics not quite clear to the coder [myself].
+
+Not beeing a 'logician' nor 'mathematitian' apologies for any typos [bugs] in the code :-) 
+
+![RGB](Syllogism.png??raw=true "Venn diagrams")
+
+Archive contains source texts and binaries compressed in Stuff-it.
+
