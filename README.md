@@ -47,8 +47,6 @@ replacing CR line ending with LF, a suitable text editor will convert with whate
 
 Have you ever fancied classic Mac programming? Here is how - this is a functional application documented in `Inside Macintosh - Overview' book. It evaluates syllogism in Venn circles, based on the figure and mood. While the book's main focus is on user interface coding, some parts are left undefined. Fortunattely there are usefull hints given inside, that make it possible to code those missing parts. 
 
-Currently unsupported are - automatic diagramme updates, and existential import to subject. Topics not quite clear to the coder [me].
-
 Not beeing a 'logician' nor 'mathematician' apologies for any typos [bugs] in the code :-) 
 
 ![RGB](Syllogism.png??raw=true "Venn diagrams")
