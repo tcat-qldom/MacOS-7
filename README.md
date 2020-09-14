@@ -51,3 +51,8 @@ Not beeing a 'logician' nor 'mathematician' apologies for any typos [bugs] in th
 
 ![RGB](Syllogism.png??raw=true "Venn diagrams")
 
+
+# Tour de MacBug
+
+![RGB](MacBug.png??raw=true "User Break")
+
