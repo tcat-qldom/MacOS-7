@@ -36,11 +36,11 @@ Events passed to the app, are controlled by SIZE resource ID of -1.
 
 ![RGB](OS71-Events.png??raw=true "System7 events")
 
-To view source files in MyApps folder on ux* systems,
+Source files were converted with,
 
-	$ sed s/\\r/\\n/g [file] | less
+	$ sed -i s/\\r/\\n/g [file]
 
-replacing CR line ending with LF, a suitable text editor will convert with whatever needed for your OS.
+replacing CR line ending with LF, so they can be viewed right in GIT browser. Archive contains source texts along with binaries and resources compressed in Stuff-It.
 
 
 # Venn Diagrammer
@@ -50,6 +50,4 @@ Have you ever fancied classic Mac programming? Here is how - this is a functiona
 Not beeing a 'logician' nor 'mathematician' apologies for any typos [bugs] in the code :-) 
 
 ![RGB](Syllogism.png??raw=true "Venn diagrams")
-
-Archive contains source texts and binaries compressed in Stuff-It.
 
