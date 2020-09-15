@@ -24,6 +24,7 @@ INTERFACE								{this is the application logic}
 		rSyllogismType = 'SLGM';
 		rSyllogismID = 1001;
 		kNumValidSyllogism = 24;
+		kNumTerms = 13;
 		A = 1; E = 2; I = 3; O = 4;
 		P = 1; S = 2; M = 3;
 		
@@ -125,11 +126,28 @@ IMPLEMENTATION
 	END; {DoVennClear}
 
 	PROCEDURE DoVennNext(myWindow: WindowPtr);
+		VAR count: Integer;
+			myHandle: MyDocRecHnd;
+			myStr: Str255;
 	BEGIN
-		DoGetRandomTerms(myWindow);
+		myHandle := MyDocRecHnd(GetWRefCon(myWindow));
+		IF gStepRandom THEN
+			DoGetRandomTerms(myWindow)
+		ELSE
+			WITH myHandle^^ DO
+				BEGIN
+					currTerm := currTerm + 3;
+					IF currTerm > (kNumTerms - 1) * 3 THEN currTerm := 0;
+					FOR count := 1 TO 3 DO
+						BEGIN
+							GetIndString(myStr, rVennTerms, currTerm + count);
+							terms[count] := myStr
+						END		
+				END;
+
 		DoCalcAnswer(myWindow);
 		InvalRect(myWindow^.portRect)
-	END;
+	END; {DoVennNext}
 
 	PROCEDURE DoVennAssess(myWindow: WindowPtr);
 		VAR
@@ -170,19 +188,20 @@ IMPLEMENTATION
 	END; {DoVennAssess}
 
 	PROCEDURE DoGetRandomTerms(myWindow: WindowPtr);
-		CONST kNumTerms = 13;
-		VAR count, terms: Integer;
+		VAR count: Integer;
 			myHandle: MyDocRecHnd;
 			myStr: Str255;
 	BEGIN
 		myHandle := MyDocRecHnd(GetWRefCon(myWindow));
-		terms := MyRandom(kNumTerms - 1) * 3;
-		
-		FOR count := 1 TO 3 DO
-			BEGIN
-				GetIndString(myStr, rVennTerms, terms + count);
-				myHandle^^.terms[count] := myStr
-			END		
+		WITH myHandle^^ DO
+			currTerm := MyRandom(kNumTerms - 1) * 3;
+
+		WITH myHandle^^ DO
+			FOR count := 1 TO 3 DO
+				BEGIN
+					GetIndString(myStr, rVennTerms, currTerm + count);
+					terms[count] := myStr
+				END		
 	END; {DoGetRandomTerms}
 	
 	PROCEDURE DoCalcArgument(myHandle: MyDocRecHnd);

@@ -129,8 +129,8 @@ INTERFACE
 			premiseRgns:	ARRAY[1..7(*8*)] OF RgnHandle;	{regions for premises}
 			concRgns:		ARRAY[1..3(*4*)] OF RgnHandle;	{regions for conclusion}
 			{fields omitted in the book}				{sqaures for ..}
-			exPreRects:		ARRAY[1..7] OF Rect;		{7 (3 valid) existence symbols in premise}
-			exConRects:		ARRAY[1..3] OF Rect;		{3 (2 valid) existence symbols in conclusion}
+			exPreRects:		ARRAY[1..7] OF Rect;			{7 (3 valid) existence symbols in premise}
+			exConRects:		ARRAY[1..3] OF Rect;			{3 (2 valid) existence symbols in conclusion}
 		END;
 		MyGeometryPtr = ^MyGeometryRec;
 		MyGeometryHnd = ^MyGeometryPtr;
@@ -152,6 +152,7 @@ INTERFACE
 			isAnswerShowing: Boolean;				{is the answer showing?}
 			isExistImport:	Boolean;				{stmts imply exists subject?}
 			needsAdjusting:	Boolean;				{diagram needs adjusting?}
+			currTerm:		Integer;				{current term settings}
 		END;
 		MyDocRecPtr = ^MyDocRec;
 		MyDocRecHnd = ^MyDocRecPtr;	
@@ -180,6 +181,6 @@ INTERFACE
 		gAutoAdjust: 		Boolean;				{automatically adjust the diagram?}
 		gGiveImport:		Boolean;				{do subjects have existential import?}
 		gShowNames:			Boolean;				{do we show names of valid forms?}
-
+		
 IMPLEMENTATION
 END. {UNIT Global}

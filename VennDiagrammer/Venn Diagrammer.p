@@ -1,4 +1,13 @@
 PROGRAM VennDiagrammer;
+{
+	Tutorial application described in new Inside Macintosh - Overview
+	book. Lets a user to evaluate syllogism based on the figure and mood.
+	User graphs the information into Venn Circles.
+	
+	(c) 2020 tcat <thomas.kral@email.cz>
+		recoded all known source from the book, making MPW project
+		programmed undefined portions of the code in the book
+}
 
 USES
 	{System Units}
@@ -240,7 +249,7 @@ BEGIN
 							mood[2] := 1;
 							mood[3] := 1;
 							isAnswerShowing := FALSE;
-							isExistImport := gGiveImport
+							isExistImport := gGiveImport;
 						END;
 					DoGetRandomTerms(myWindow);
 					DoCalcAnswer(myWindow);
