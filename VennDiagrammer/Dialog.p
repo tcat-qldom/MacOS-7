@@ -147,15 +147,15 @@ IMPLEMENTATION
 				IF myDialog <> NIL THEN
 					BEGIN
 						DoSetupUserItems(myKind, myDialog);	{set up user items}
-						DoSetupCtrlValues(myDialog);	{set up initial values}
-					END;
+						DoSetupCtrlValues(myDialog)		{set up initial values}
+					END
 			END
 		ELSE
 			BEGIN
 				ShowWindow(myDialog);
 				SelectWindow(myDialog);
-				SetPort(myDialog);
-			END;
+				SetPort(myDialog)
+			END
 	END;
 
 {DoHandleDialogEvent: handle events in modeless dialog boxes}
@@ -167,41 +167,44 @@ IMPLEMENTATION
 	BEGIN
 		eventHandled := FALSE;
 		IF FrontWindow <> NIL THEN
-			IF IsDialogEvent(myEvent) THEN
-				IF DialogSelect(myEvent, myDialog, myItem) THEN
-					BEGIN
-						eventHandled := TRUE;
-						SetPort(myDialog);
+			(*IF IsDialogEvent(myEvent) THEN*)	{checked in DoEventLoop}
+			IF DialogSelect(myEvent, myDialog, myItem) THEN
+				BEGIN
+					eventHandled := TRUE;
+					SetPort(myDialog);
 
-						IF myDialog = gPrefsDialog THEN
-							BEGIN
-								CASE myItem OF
-									iEmpty1Radio..iEmpty4Radio: 
-										gEmptyIndex := myItem;
-									iEmpty1Icon..iEmpty4Icon: 
-										gEmptyIndex := myItem - 4;
-									iExist1Radio..iExist4Radio: 
-										gExistIndex := myItem - iEmpty4Icon;
-									iExist1Icon..iExist4Icon: 
-										gExistIndex := myItem - (iEmpty4Icon + 4);
-									iGetNextRandomly: 
-										gStepRandom := NOT gStepRandom;
-									iAutoAdjust: 
-										gAutoAdjust := NOT gAutoAdjust;
-									iShowSchoolNames: 
-										gShowNames := NOT gShowNames;
-									iUseExistImport: 
-										gGiveImport := NOT gGiveImport;
-									iSaveVennPrefs: 
+					IF myDialog = gPrefsDialog THEN
+						BEGIN
+							CASE myItem OF
+								iEmpty1Radio..iEmpty4Radio: 
+									gEmptyIndex := myItem;
+								iEmpty1Icon..iEmpty4Icon: 
+									gEmptyIndex := myItem - 4;
+								iExist1Radio..iExist4Radio: 
+									gExistIndex := myItem - iEmpty4Icon;
+								iExist1Icon..iExist4Icon: 
+									gExistIndex := myItem - (iEmpty4Icon + 4);
+								iGetNextRandomly: 
+									gStepRandom := NOT gStepRandom;
+								iAutoAdjust: 
+									gAutoAdjust := NOT gAutoAdjust;
+								iShowSchoolNames: 
+									gShowNames := NOT gShowNames;
+								iUseExistImport: 
+									gGiveImport := NOT gGiveImport;
+								iSaveVennPrefs:
+									BEGIN
+										{Unload Preferences segment after saving.}
 										DoSavePrefs;
-									OTHERWISE
-										;
-								END;
-
-								DoSetupCtrlValues(myDialog);	{update values}
+										UnloadSeg(@DoSavePrefs)
+									END;
+								OTHERWISE
+									;
 							END;
-					END;
 
+							DoSetupCtrlValues(myDialog);	{update values}
+						END;
+				END;
 		DoHandleDialogEvent := eventHandled
 	END;
 	

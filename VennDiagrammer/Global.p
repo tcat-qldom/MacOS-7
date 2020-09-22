@@ -114,7 +114,8 @@ INTERFACE
 		rErrorAlert				= 129;			{res ID of 'ALRT' resource for error mesgs}
 		kErrorStrings			= 1005;			{res ID of 'STR#' resource for error mesgs}
 		eCantFindMenus			= 1;			{can't read menu bar resource}
-		eNotEnoughMemory		= 2;			{insufficient memory for operation}
+		eNotEnoughMemory		= 2;			{insufficient memory to run application}
+		eMemoryLow				= 3;			{low memory to complete operation}
 
 		{constants defining several keyboard characters}
 		kEnter					= Chr(3);		{the enter character}

@@ -220,11 +220,37 @@ PROCEDURE _DataInit; EXTERNAL;
 
 {$S Main}
 FUNCTION DoCreateWindow: WindowPtr;
+	CONST kMinTotal = 5000;
 	VAR
 		myPointer:	Ptr;
 		myWindow:	WindowPtr;
 		myHandle:	MyDocRecHnd;
+		total, contig: LongInt;
 BEGIN
+
+	{Inquire available total mem after purging.}
+	{Minimum memory of kMinTotal is required on the heap.}
+	
+	PurgeSpace(total, contig);
+	IF total < kMinTotal THEN
+	
+		{Dispose of Preferences Dialog, when it is not showing,
+		{and unload code segment to make more room in the heap.}
+		
+		IF (gPrefsDialog <> NIL) & NOT WindowPeek(gPrefsDialog)^.visible THEN
+			BEGIN
+				CloseDialog(gPrefsDialog);
+				DisposePtr(Ptr(gPrefsDialog));
+				gPrefsDialog := NIL;
+				UnloadSeg(@DoModelessDialog)
+			END;
+
+	PurgeSpace(total, contig);	{Do we get enouigh room?}
+	IF total < kMinTotal THEN
+		BEGIN
+			DoAlertUser(eMemoryLow); Exit(DoCreateWindow)
+		END;
+
 	myPointer := NewPtr(SizeOf(WindowRecord));
 	IF myPointer = NIL THEN Exit(DoCreateWindow);
 
@@ -237,7 +263,7 @@ BEGIN
 			IF myHandle <> NIL THEN
 				BEGIN
 					HLockHi(Handle(myHandle));				{lock the data high in the heap}
-					SetWRefCon(myWindow, LongInt(myHandle));			
+					SetWRefCon(myWindow, LongInt(myHandle));
 															{attach handle to window record}
 					DoSetWindowTitle(myWindow);				{set the window title}
 
@@ -335,7 +361,6 @@ BEGIN
 					BEGIN
 						InvalRgn(gGeometry^^.concRgns[count]);
 						conc := conc + [count]; {add clicked region to set}
-						myHandle^^.needsAdjusting := TRUE;
 						(*NumToString(count, numStr); {debug - show region numbers}
 						DoStatusText(myWindow, numStr);*)
 						Leave
@@ -373,7 +398,7 @@ PROCEDURE DoCloseWindow (myWindow: WindowPtr);
 BEGIN
 	IF myWindow <> NIL THEN
 		IF IsDialogWindow(myWindow) THEN													{this is a dialog window}
-			HideWindow(myWindow)
+			 HideWindow(myWindow)
 		ELSE IF IsDAccWindow(myWindow) THEN													{this is a DA window}
 			CloseDeskAcc(WindowPeek(myWindow)^.windowKind)
 		ELSE IF IsAppWindow(myWindow) THEN													{this is a document window}
@@ -438,6 +463,7 @@ BEGIN
 	
 	LoadResource(Handle(gEmptyPats[gEmptyIndex]));
 	HLock(Handle(gEmptyPats[gEmptyIndex]));
+	HLock(Handle(gGeometry));
 
 	{Show diagrammer premise regions graphed by the user.}
 	WITH myHandle^^, state DO
@@ -463,6 +489,7 @@ BEGIN
 				ELSE {Fill conclusion regions.}
 					FillRgn(gGeometry^^.concRgns[count], gEmptyPats[gEmptyIndex]^^);
 
+	HUnlock(Handle(gGeometry));
 	HUnlock(Handle(gEmptyPats[gEmptyIndex]));
 	
 	{Draw 'Figure', 'Mood' texts.}
@@ -570,9 +597,8 @@ BEGIN
 				myHandle := MyDocRecHnd(GetWRefCon(myWindow));
 				IF myHandle^^.needsAdjusting THEN
 					DoVennIdle(myWindow);
-			END;
-	(*SystemTask*)
-END;
+			END
+END; {DoIdle}
 
 {$S Main}
 PROCEDURE DoActivate (myWindow: WindowPtr; myModifiers: Integer);
@@ -716,12 +742,14 @@ END; {DoQuit}
 
 {$S Main}
 PROCEDURE DoMenuCommand (menuAndItem: LongInt);
+	CONST kMinTotal = 6200;
 	VAR
 		myMenuNum:	Integer;
 		myItemNum:	Integer;
 		myResult:	Integer;
 		myDAName:	Str255;
 		myWindow:	WindowPtr;
+		total, contig: LongInt;
 BEGIN
 	myMenuNum := HiWord(menuAndItem);
 	myItemNum := LoWord(menuAndItem);
@@ -758,18 +786,26 @@ BEGIN
 			BEGIN
 				myWindow := FrontWindow;
 				CASE myItemNum OF
-					iCheckVenn: 
+					iCheckVenn:
 						DoVennCheck(myWindow);
-					iDoVenn: 
+					iDoVenn:
 						DoVennAnswer(myWindow);
-					iClearVenn: 
+					iClearVenn:
 						DoVennClear(myWindow);
 					iNextTask: 
 						DoVennNext(myWindow);
-					iCheckArg: 
+					iCheckArg:
 						DoVennAssess(myWindow);
-					iGetVennPrefs: 
-						DoModelessDialog(rVennDPrefsDial, gPrefsDialog);
+					iGetVennPrefs:
+						BEGIN
+							{At least kMinTotal is needed for the segment and data}
+							{of the Preferences dialog to operate.}
+							PurgeSpace(total, contig);
+							IF (gPrefsDialog = NIL) AND (total < kMinTotal) THEN
+								DoAlertUser(eMemoryLow)
+							ELSE
+								DoModelessDialog(rVennDPrefsDial, gPrefsDialog)
+						END;
 					OTHERWISE
 						;
 				END;
@@ -811,12 +847,9 @@ BEGIN
 		END;
 
 	{See if the click is in the status area.}
-	SetRect(myRect, kToolWd * kNumTools, 0, 
-						myWindow^.portRect.right, kToolHt);
+	SetRect(myRect, kToolWd * kNumTools, 0, myWindow^.portRect.right, kToolHt);
 	IF PtInRect(myEvent.where, myRect) THEN
-		BEGIN
-			Exit(DoContentClick);							
-		END;
+		Exit(DoContentClick);							
 
 	{The click must be in somewhere in the rest of the window.}
 	DoVennClick(myWindow, myEvent.where);
@@ -899,37 +932,42 @@ END; {DoMouseDown}
 PROCEDURE DoMainEventLoop;
 	VAR
 		myEvent:	EventRecord;
-		gotEvent:	Boolean;			{is returned event for me?}
+		gotEvent, 
+		dlgHandled:	Boolean;			{is returned event for me?}
 BEGIN
 	REPEAT
 		gotEvent := WaitNextEvent(everyEvent, myEvent, 15, NIL);
-		IF NOT DoHandleDialogEvent(myEvent) THEN
-			IF gotEvent THEN
-				BEGIN
-					CASE myEvent.what OF
-						mouseDown: 
-							DoMouseDown(myEvent);						{see page 120}
-						keyDown, autoKey: 
-							DoKeyDown(myEvent);							{see page 160}
-						updateEvt: 
-							DoUpdate(WindowPtr(myEvent.message));		{see page 124}
-						diskEvt: 
-							DoDiskEvent(myEvent);						{see page 77}
-						activateEvt: 
-							DoActivate(WindowPtr(myEvent.message),
-											 myEvent.modifiers);		{see page 126}
-						osEvt: 
-							DoOSEvent(myEvent);							{see page 171}
-						keyUp, mouseUp: 
-							;
-						nullEvent:
-							DoIdle(myEvent);							{see page 173}
-						OTHERWISE
-							;
-					END; {CASE}
-				END
-			ELSE
-				DoIdle(myEvent);
+		dlgHandled := FALSE;
+
+		IF IsDialogEvent(myEvent) THEN
+			dlgHandled := DoHandleDialogEvent(myEvent);
+			
+		IF gotEvent AND NOT dlgHandled THEN
+			BEGIN
+				CASE myEvent.what OF
+					mouseDown: 
+						DoMouseDown(myEvent);						{see page 120}
+					keyDown, autoKey: 
+						DoKeyDown(myEvent);							{see page 160}
+					updateEvt: 
+						DoUpdate(WindowPtr(myEvent.message));		{see page 124}
+					diskEvt: 
+						DoDiskEvent(myEvent);						{see page 77}
+					activateEvt: 
+						DoActivate(WindowPtr(myEvent.message),
+										 myEvent.modifiers);		{see page 126}
+					osEvt: 
+						DoOSEvent(myEvent);							{see page 171}
+					keyUp, mouseUp: 
+						;
+					nullEvent:
+						DoIdle(myEvent);							{see page 173}
+					OTHERWISE
+						;
+				END; {CASE}
+			END
+		ELSE
+			DoIdle(myEvent);
 	UNTIL gDone;					{loop until user quits}
 END; {DoMainEventLoop}
 
@@ -948,7 +986,8 @@ BEGIN
 	
 	DoReadPrefs;						{read the user's preference settings}
 	DoVennInit;
-	UnloadSeg(@DoVennInit);		{note that DoVennInit must not be in Main!}
+	UnloadSeg(@DoReadPrefs);	{note that DoReadPrefs, DoVennInit}
+	UnloadSeg(@DoVennInit);		{must not be in Main!}
 
 	DoMainEventLoop				{and then loop forever...}
 END.

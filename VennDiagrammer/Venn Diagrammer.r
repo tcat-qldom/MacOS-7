@@ -4,8 +4,8 @@
 #include "SysTypes.r"
 #include "Global.h"
 
-#define kMinSize	46			/* application's minimum size (in K) */
-#define kPrefSize	48			/* application's preferred size (in K) */
+#define kMinSize	44			/* application's minimum size (in K) */
+#define kPrefSize	46			/* application's preferred size (in K) */
 
 Include "PAT.rsrc";				/* include empty PATterns made in ResEdit */
 Include "DITL.rsrc";			/* include DLOG items made in ResEdit */
@@ -156,7 +156,11 @@ Resource 'STR#' (kErrorStrings, purgeable) {
 	/*[1]*/ "Cannot find application resources.\n"
 			"This copy of the application might be corrupt.\n"
 			"Try replacing it with a back up copy.",
-	/*[2]*/ "There is not enough memory to complete the operation.\n"
+	/*[2]*/ "There is not enough memory to run\n"
+			"the application.\n"
+			"Try increasing application size partition.",
+	/*[3]*/ "There is not enough memory to complete\n"
+			"the operation.\n"
 			"You may have too many windows open."
 	}
 };

@@ -16,6 +16,7 @@ INTERFACE
 	FUNCTION DoTrackRect (myWindow: WindowPtr; myRect: Rect): Boolean;
 	PROCEDURE DoStatusText (myWindow: WindowPtr; myText: Str255);
 	PROCEDURE DoStatusMesg (myWindow: WindowPtr; myMessageID: Integer);
+	PROCEDURE DoAlertUser (myError: Integer);
 	PROCEDURE DoBadError (myError: Integer);
 	FUNCTION IsFindFolder: Boolean;
 	FUNCTION MyRandom (last: Integer): Integer;
@@ -188,6 +189,18 @@ IMPLEMENTATION
 		DoStatusText(myWindow, myText);
 	END;
 
+{DoAlertUser: alert user, do not terminate the app}
+	PROCEDURE DoAlertUser (myError: Integer);
+		VAR
+			myItem:		Integer;
+			myMessage:	Str255;
+	BEGIN
+		SetCursor(arrow);								{set arrow cursor}
+		GetIndString(myMessage, kErrorStrings, myError);
+		ParamText(myMessage, '', '', '');
+		myItem := NoteAlert(rErrorAlert, NIL)			{display message}
+	END;
+
 {DoBadError: inform the user of fatal errors, then terminate the app}
 	PROCEDURE DoBadError (myError: Integer);
 		VAR
@@ -197,8 +210,8 @@ IMPLEMENTATION
 		SetCursor(arrow);								{set arrow cursor}
 		GetIndString(myMessage, kErrorStrings, myError);
 		ParamText(myMessage, '', '', '');
-		myItem := StopAlert(rErrorAlert, NIL);														{display message}
-		ExitToShell;									{terminate execution}
+		myItem := StopAlert(rErrorAlert, NIL);			{display message}
+		ExitToShell									{terminate execution}
 	END;
 
 {IsFindFolder: is the FindFolder function available?}
