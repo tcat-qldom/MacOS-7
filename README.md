@@ -55,21 +55,23 @@ Not beeing a 'logician' nor 'mathematician' apologies for any typos [bugs] in th
 # Tour de MacsBug
 
 HD (Heap Dump)  and HT (Heap Total) commands show allocation in the heap.
+
 ![RGB](MacsBug.png??raw=true "User Break")
 
 MacsBug is a low level debugger, It is an indispensable tool for every Mac and progarmmer. It can catch most if not all exceptions, allows user debug output messages, debug low mem conditions, help finding dangling pointers, sensible app segment strategy, and much more.
 
-Here it is used to determine low mem conditions, and appropriate segment strategy for Venn Diagrammer. The minimum breathing room for app to run is 5000-6200 bytes in the heap with the application partition set to 44K. That must accomodate both data and resources.
+Here it is used to determine low mem conditions, and appropriate segment strategy for Venn Diagrammer. The minimum breathing room for app to run is some 5000-6200 bytes in the heap with the application partition set to 44K. That must accomodate both data and resources.
 
-Generally all segments and resources are purgable, making it possible for the resource and memory manager to reuse space when needed. The only segment locked is 'Main' this is where event loop is executed.
+Generally all segments and resources are purgable, making it possible for the resource and memory managers to reuse space when needed. The only segment locked is 'Main', this is where event loop is executed.
 On startup 'Init', and '%A5Init' segments are unloaded as they are used only during initilisation. 
 
 'Preferences' segment is used only on startup, or when user saves their settings in the dialog. Else is unloaded.
 
 Available memory is inquired in two places. When a new window is created, or 'Preferences' dialog displayed.
 
-If the dialog is not showing and user requests another window, the dialog is disposed of and the whole 'Dialog' segment unloaded.
+If the dialog is not showing and user requests another window, while memory is running low, the dialog is disposed of and the whole 'Dialog' segment unloaded.
 
 When there is still less than 5000 bytes total free, user is alerted of low memory condition.
 
 The strategy is not perfect, but shows the idea how segmented code works on Mac.
+

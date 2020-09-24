@@ -175,18 +175,37 @@ IMPLEMENTATION
 {Save the current preference settings.}
 	PROCEDURE DoSavePrefs;
 		VAR
-			myPrefData:		Handle;		{handle to new resource data}
 			myHandle:		Handle;		{handle to resource to replace}
+			(*myPrefData:	Handle;		{handle to new resource data}
 			myName:			Str255;		{name of resource to copy}
 			myAttr:			Integer;	{resource attributes}
 			myType:			ResType;	{ignored; used for GetResInfo}
-			myID:			Integer;	{ignored; used for GetResInfo}
+			myID:			Integer;*)	{ignored; used for GetResInfo}
 	BEGIN
 		{Make sure we have an open preferences file.}
 		IF gPreferencesFile = -1 THEN		
 			exit(DoSavePrefs);
+			
+		{Alternative code used to save resource.}
 
-		myPrefData := NewHandleClear(sizeof(MyPrefsRec));
+		UseResFile(gPreferencesFile);			{use preferences file}
+  		myHandle := Get1Resource(kPrefResType, kPrefResID);
+		IF myHandle <> NIL THEN
+			WITH MyPrefsHnd(myHandle)^^ DO
+				BEGIN
+					HNoPurge(myHandle);			{make resource unpurgeable}
+					autoDiag := gAutoAdjust;
+					showName := gShowNames;
+					isImport := gGiveImport;
+					isRandom := gStepRandom;
+					emptyInd := gEmptyIndex;
+					existInd := gExistIndex;
+					ChangedResource(myHandle);	{mark it as changed, and}
+					SetResPurge(TRUE);			{set to write before purge}
+					HPurge(myHandle)			{make it purgeable again}
+				END;
+
+(*		myPrefData := NewHandleClear(sizeof(MyPrefsRec));
 		HLock(myPrefData);
 		WITH MyPrefsHnd(myPrefData)^^ DO
 			BEGIN
@@ -208,11 +227,14 @@ IMPLEMENTATION
 				IF ResError = noErr THEN
 					AddResource(myPrefData, kPrefResType, kPrefResID, myName);
 				IF ResError = noErr THEN
+					SetResAttrs(myPrefData, myAttr); {omitted in the book}
+				IF ResError = noErr THEN
 					WriteResource(myPrefData);
 			END;
 
 		HUnlock(myPrefData);
 		ReleaseResource(myPrefData);
+*)
 		UseResFile(gAppsResourceFile);	{restore app's resource file}
 
 	END; {DoSavePrefs}

@@ -2,7 +2,7 @@ UNIT Utilities;
 INTERFACE
 	USES
 		Windows, Fonts, Events, Controls, GestaltEqu, OSUtils, ToolUtils,
-		Resources, Memory, Packages, SegLoad, Global;
+		Resources, Memory, Packages, SegLoad, SysEqu, Global;
 
 	PROCEDURE DoPlotIcon (myRect: Rect; myIcon: Handle; myWindow: WindowPtr;
 								 myMode: Integer);
@@ -109,7 +109,15 @@ IMPLEMENTATION
 
 {DoPositionWindow: set the position of a new window}
 	PROCEDURE DoPositionWindow (myWindow: WindowPtr);
+		VAR pos: Point;
 	BEGIN
+	IF FrontWindow <> NIL THEN
+		BEGIN
+			pos.v := (gNumDocWindows - 1) MOD 4 * 20;
+			pos.h := pos.v;
+			LocalToGlobal(pos);
+			MoveWindow(myWindow, pos.h, pos.v, FALSE)
+		END
 	END;
 
 {DoSetWindowTitle: construct a title for a new window}

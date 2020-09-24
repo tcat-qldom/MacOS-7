@@ -167,7 +167,7 @@ IMPLEMENTATION
 	BEGIN
 		eventHandled := FALSE;
 		IF FrontWindow <> NIL THEN
-			(*IF IsDialogEvent(myEvent) THEN*)	{checked in DoEventLoop}
+			(*IF IsDialogEvent(myEvent) THEN*)	{checked in DoMainEventLoop}
 			IF DialogSelect(myEvent, myDialog, myItem) THEN
 				BEGIN
 					eventHandled := TRUE;

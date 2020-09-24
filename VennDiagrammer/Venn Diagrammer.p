@@ -54,7 +54,7 @@ BEGIN
 END;
 
 {$S Init}
-{Renamed from MyGetIndCircleRect to handle general 'REC#' Ind resource}
+{Renamed from MyGetIndCircleRect to handle general 'REC#' indexed resource.}
 FUNCTION MyGetIndRect(ind: Integer): Rect;
 	CONST
 		kVennRectType = 'REC#';
@@ -245,7 +245,7 @@ BEGIN
 				UnloadSeg(@DoModelessDialog)
 			END;
 
-	PurgeSpace(total, contig);	{Do we get enouigh room?}
+	PurgeSpace(total, contig);	{Do we get enough room?}
 	IF total < kMinTotal THEN
 		BEGIN
 			DoAlertUser(eMemoryLow); Exit(DoCreateWindow)
@@ -339,6 +339,8 @@ BEGIN
 						Leave
 					END;
 
+	HLock(Handle(gGeometry));
+
 	{Look for a click in one of the seven premises regions.}
 	FOR count := 1 TO 7 DO
 		IF PtInRgn(myPoint, gGeometry^^.premiseRgns[count]) THEN
@@ -365,6 +367,8 @@ BEGIN
 						DoStatusText(myWindow, numStr);*)
 						Leave
 					END;
+
+	HUnlock(Handle(gGeometry))
 
 END; {DoVennClick}
 
@@ -625,10 +629,8 @@ PROCEDURE DoOSEvent (myEvent: EventRecord);
 		myWindow: WindowPtr;
 BEGIN
 	CASE BSr(myEvent.message, 24) OF
-		mouseMovedMessage: 
-			BEGIN
-				DoIdle(myEvent);	{right now, do nothing}
-			END;
+		mouseMovedMessage:
+			DoIdle(myEvent);	{right now, do nothing}
 		suspendResumeMessage: 
 			BEGIN
 				myWindow := FrontWindow;
@@ -764,24 +766,22 @@ BEGIN
 					BEGIN
 						GetItem(GetMHandle(mApple), myItemNum, myDAName);
 						myResult := OpenDeskAcc(myDAName);
-					END;
+					END
 			END;
 		mFile: 
-			BEGIN
-				CASE myItemNum OF
-					iNew: 
-						myWindow := DoCreateWindow;
-					iClose: 
-						DoCloseWindow(FrontWindow);
-					iQuit: 
-						DoQuit;
-					OTHERWISE
-						;
-				END;
+			CASE myItemNum OF
+				iNew: 
+					myWindow := DoCreateWindow;
+				iClose: 
+					DoCloseWindow(FrontWindow);
+				iQuit: 
+					DoQuit;
+				OTHERWISE
+					;
 			END;
 		mEdit:
-				IF NOT SystemEdit(myItemNum - 1) THEN
-					;
+			IF NOT SystemEdit(myItemNum - 1) THEN
+				;
 		mVennD: 
 			BEGIN
 				myWindow := FrontWindow;
@@ -808,7 +808,7 @@ BEGIN
 						END;
 					OTHERWISE
 						;
-				END;
+				END
 			END;
 
 		OTHERWISE
@@ -933,39 +933,39 @@ PROCEDURE DoMainEventLoop;
 	VAR
 		myEvent:	EventRecord;
 		gotEvent, 
-		dlgHandled:	Boolean;			{is returned event for me?}
+		dlgHandled:	Boolean;			{Is event handled by dialog?}
 BEGIN
 	REPEAT
 		gotEvent := WaitNextEvent(everyEvent, myEvent, 15, NIL);
 		dlgHandled := FALSE;
 
+		{Handle dialog events first, moved from Dialog unit,}
+		{allowing dynamic load of Dialog segment.}
 		IF IsDialogEvent(myEvent) THEN
 			dlgHandled := DoHandleDialogEvent(myEvent);
 			
 		IF gotEvent AND NOT dlgHandled THEN
-			BEGIN
-				CASE myEvent.what OF
-					mouseDown: 
-						DoMouseDown(myEvent);						{see page 120}
-					keyDown, autoKey: 
-						DoKeyDown(myEvent);							{see page 160}
-					updateEvt: 
-						DoUpdate(WindowPtr(myEvent.message));		{see page 124}
-					diskEvt: 
-						DoDiskEvent(myEvent);						{see page 77}
-					activateEvt: 
-						DoActivate(WindowPtr(myEvent.message),
-										 myEvent.modifiers);		{see page 126}
-					osEvt: 
-						DoOSEvent(myEvent);							{see page 171}
-					keyUp, mouseUp: 
-						;
-					nullEvent:
-						DoIdle(myEvent);							{see page 173}
-					OTHERWISE
-						;
-				END; {CASE}
-			END
+			CASE myEvent.what OF
+				mouseDown: 
+					DoMouseDown(myEvent);						{see page 120}
+				keyDown, autoKey: 
+					DoKeyDown(myEvent);							{see page 160}
+				updateEvt: 
+					DoUpdate(WindowPtr(myEvent.message));		{see page 124}
+				diskEvt: 
+					DoDiskEvent(myEvent);						{see page 77}
+				activateEvt: 
+					DoActivate(WindowPtr(myEvent.message),
+									 myEvent.modifiers);		{see page 126}
+				osEvt: 
+					DoOSEvent(myEvent);							{see page 171}
+				keyUp, mouseUp: 
+					;
+				nullEvent:
+					DoIdle(myEvent);							{see page 173}
+				OTHERWISE
+					;
+			END {CASE}
 		ELSE
 			DoIdle(myEvent);
 	UNTIL gDone;					{loop until user quits}

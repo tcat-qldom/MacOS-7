@@ -126,10 +126,10 @@ Resource 'ALRT' (rErrorAlert, purgeable) {																		/*dialog resource*/
 	{80, 40, 80+108, 40+394},
 	rErrorAlert,
 	{
-		OK, visible, sound1,
-		OK, visible, sound1,
-		OK, visible, sound1,
-		OK, visible, sound1
+		/*[4]*/ OK, visible, silent,
+		/*[3]*/ OK, visible, silent,
+		/*[2]*/ OK, visible, silent,
+		/*[1]*/ OK, visible, sound1
 	},
 	noAutoCenter
 };
