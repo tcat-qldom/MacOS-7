@@ -39,6 +39,7 @@ Events passed to the app, are controlled by SIZE resource ID of -1.
 Source files were converted with,
 
 	$ sed -i s/\\r/\\n/g [file]
+	$ detab -t4 *
 
 replacing CR line ending with LF, so they can be viewed right in GIT browser. Archive contains source texts along with binaries and resources compressed in Stuff-It.
 
@@ -58,11 +59,11 @@ HD (Heap Dump)  and HT (Heap Total) commands show allocation in the heap.
 
 ![RGB](MacsBug.png??raw=true "User Break")
 
-MacsBug is a low level debugger, It is an indispensable tool for every Mac and progarmmer. It can catch most if not all exceptions, allows user debug output messages, debug low mem conditions, help finding dangling pointers, sensible app segment strategy, and much more.
+MacsBug is a low level debugger, it is an indispensable tool for every Mac and programmer. It can catch most if not all exceptions, allows user debug output messages, debug low mem conditions, help finding dangling pointers, sensible app segment strategy, and much more.
 
 Here it is used to determine low mem conditions, and appropriate segment strategy for Venn Diagrammer. The minimum breathing room for app to run is some 5000-6200 bytes in the heap with the application partition set to 44K. That must accomodate both data and resources.
 
-Generally all segments and resources are purgable, making it possible for the resource and memory managers to reuse space when needed. The only segment locked is 'Main', this is where event loop is executed.
+Generally all segments and resources are purgable, making it possible for the resource and memory managers to reuse space when needed. The only unpurgeable segment is 'Main', this is where event loop is executed.
 On startup 'Init', and '%A5Init' segments are unloaded as they are used only during initilisation. 
 
 'Preferences' segment is used only on startup, or when user saves their settings in the dialog. Else is unloaded.
@@ -73,5 +74,5 @@ If the dialog is not showing and user requests another window, while memory is r
 
 When there is still less than 5000 bytes total free, user is alerted of low memory condition.
 
-The strategy is not perfect, but shows the idea how segmented code works on Mac.
+The strategy is not perfect, but shows [hopefully] the idea how segmented code works on Mac.
 
